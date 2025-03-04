@@ -1,0 +1,68 @@
+using UnityEngine;
+using UnityEngine.UI;
+using UnityEngine.SceneManagement;
+using TMPro;
+
+public class RegistrationManager : MonoBehaviour
+{
+    [Header("UI References")]
+    [SerializeField] private TMP_InputField usernameInput;
+    [SerializeField] private TMP_InputField passwordInput;
+    [SerializeField] private Button submitButton;
+    [SerializeField] private TMP_Text errorText;
+
+    [Header("Settings")]
+    [SerializeField] private int minUsernameLength = 3;
+    [SerializeField] private int minPasswordLength = 6;
+    [SerializeField] private string nextSceneName = "MainGame";
+
+    private void Start()
+    {
+        submitButton.onClick.AddListener(OnSubmit);
+        UpdateButtonState();
+
+        // Добавляем проверку в реальном времени
+        usernameInput.onValueChanged.AddListener(delegate { UpdateButtonState(); });
+        passwordInput.onValueChanged.AddListener(delegate { UpdateButtonState(); });
+    }
+
+    private void UpdateButtonState()
+    {
+        bool inputsValid =
+            usernameInput.text.Length >= minUsernameLength &&
+            passwordInput.text.Length >= minPasswordLength;
+
+        submitButton.interactable = inputsValid;
+    }
+
+    private void OnSubmit()
+    {
+        if (ValidateCredentials())
+        {
+            SavePlayerData();
+            LoadNextScene();
+        }
+    }
+
+    private bool ValidateCredentials()
+    {
+        if (usernameInput.text.Contains(" "))
+        {
+            errorText.text = "Username cannot contain spaces!";
+            return false;
+        }
+        return true;
+    }
+
+    private void SavePlayerData()
+    {
+        PlayerPrefs.SetString("Username", usernameInput.text);
+        PlayerPrefs.SetString("Password", passwordInput.text);
+        PlayerPrefs.Save();
+    }
+
+    private void LoadNextScene()
+    {
+        SceneManager.LoadScene(nextSceneName);
+    }
+}
